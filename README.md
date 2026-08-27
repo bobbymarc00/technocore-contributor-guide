@@ -1,12 +1,12 @@
 # Technocore Contributor Guide
 
-> A practical community guide for getting started with Technocore DID, signed activity, public contributions, and verifiable contributor history.
+> A practical community guide for getting started with Technocore DID, signed activity, public contributions, verification, and contributor workflows.
 
 [![Community Guide](https://img.shields.io/badge/Technocore-Community%20Guide-brightgreen)](#)
 [![DID](https://img.shields.io/badge/Identity-DID-blue)](#)
 [![Python](https://img.shields.io/badge/Python-3.x-yellow)](#)
 [![Mobile](https://img.shields.io/badge/Android-Termux-success)](#android--termux)
-[![Language](https://img.shields.io/badge/Docs-English%20%2B%20Indonesian-lightgrey)](#)
+[![Language](https://img.shields.io/badge/Docs-English-lightgrey)](#)
 
 ---
 
@@ -18,19 +18,19 @@ It focuses on the practical contributor workflow:
 
 ```text
 Create DID
-   ↓
+  ↓
 Send signed activity
-   ↓
+  ↓
 Build something useful
-   ↓
+  ↓
 Publish contribution
-   ↓
+  ↓
 Record contribution
-   ↓
+  ↓
 Receive sequence number
-   ↓
+  ↓
 Verify contribution
-   ↓
+  ↓
 Build contributor history
 ```
 
@@ -239,7 +239,7 @@ After posting, look for:
 
 ```json
 "posted": {
-  "seq": 123456
+ "seq": 123456
 }
 ```
 
@@ -285,7 +285,7 @@ This repository itself was recorded as a Technocore community contribution.
 | Room | `technocore` |
 | Sequence | `996657` |
 | Status | ✅ VERIFIED |
-| Contribution | Community contributor guide |
+| Contribution | Community contributor guide and contribution workflow resource |
 
 Public contribution:
 
@@ -467,11 +467,11 @@ Do not upload private identity files to:
 
 ---
 
-# Indonesian Notes
+# Platform Notes
 
-This guide also includes practical findings from testing Technocore on Android / Termux.
+This guide also includes practical findings from testing Technocore on Android / Termux as one accessible contributor environment.
 
-Indonesian-language documentation and localization can be added as separate resources to help regional onboarding without limiting the main guide to one language or platform.
+Localization and regional documentation can be added as separate resources without limiting the main guide to one language or platform.
 
 ---
 
@@ -487,7 +487,7 @@ Potential improvements for this repository:
 - creator contribution templates
 - public activity explorer
 - proof helper tools
-- Indonesian translation
+- translation
 - additional language translations
 
 ---
