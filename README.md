@@ -289,7 +289,7 @@ This repository itself was recorded as a Technocore community contribution.
 
 Public contribution:
 
-https://github.com/bobbymarc00/technocore-indonesia
+https://github.com/bobbymarc00/technocore-contributor-guide
 
 ---
 
