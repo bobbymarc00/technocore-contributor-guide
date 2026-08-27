@@ -1,63 +1,97 @@
-# 🇮🇩 Technocore Indonesia
+# Technocore Contributor Guide
 
-> A community-built Indonesian guide for running Technocore DID directly from Android using Termux.
+> A practical community guide for getting started with Technocore DID, signed activity, public contributions, and verifiable contributor history.
 
-[![Platform](https://img.shields.io/badge/Platform-Android-green)](https://www.android.com/)
-[![Terminal](https://img.shields.io/badge/Terminal-Termux-black)](https://termux.dev/)
-[![Python](https://img.shields.io/badge/Python-3.x-blue)](https://www.python.org/)
-[![Contribution](https://img.shields.io/badge/Technocore-Contribution-brightgreen)](#verified-contribution)
-[![Language](https://img.shields.io/badge/Language-Bahasa%20Indonesia-red)](#)
-
----
-
-## ✨ About This Project
-
-**Technocore Indonesia** adalah panduan komunitas untuk membantu pengguna Indonesia mencoba Technocore DID dari perangkat Android.
-
-Fokus utama repository ini:
-
-- setup Technocore melalui **Termux**
-- membuat dan menggunakan **DID**
-- mengirim signed message
-- mencatat public contribution
-- troubleshooting `cryptography` pada Python 3.14 / Termux
-- backup identity dengan aman
-
-Tujuannya adalah menurunkan barrier bagi pengguna yang tidak memiliki VPS atau PC tetapi ingin belajar dan berkontribusi ke ekosistem Technocore.
-
-> [!NOTE]
-> Repository ini merupakan **community contribution** dan bukan dokumentasi resmi Flop Labs atau Technocore.
+[![Community Guide](https://img.shields.io/badge/Technocore-Community%20Guide-brightgreen)](#)
+[![DID](https://img.shields.io/badge/Identity-DID-blue)](#)
+[![Python](https://img.shields.io/badge/Python-3.x-yellow)](#)
+[![Mobile](https://img.shields.io/badge/Android-Termux-success)](#android--termux)
+[![Language](https://img.shields.io/badge/Docs-English%20%2B%20Indonesian-lightgrey)](#)
 
 ---
 
-## 🧠 What is a DID?
+## Overview
 
-Technocore menggunakan decentralized identity atau **DID** sebagai identitas public untuk menandatangani aktivitas.
+This repository is a community-built starter guide for contributors who want to understand and use Technocore.
 
-Format public DID terlihat seperti:
+It focuses on the practical contributor workflow:
+
+```text
+Create DID
+   ↓
+Send signed activity
+   ↓
+Build something useful
+   ↓
+Publish contribution
+   ↓
+Record contribution
+   ↓
+Receive sequence number
+   ↓
+Verify contribution
+   ↓
+Build contributor history
+```
+
+The goal is not only to create a DID, but to build a public and verifiable record of useful work.
+
+---
+
+## What You Can Learn Here
+
+This guide covers:
+
+- creating a Technocore DID
+- understanding public vs private identity data
+- sending signed messages
+- recording public contributions
+- saving sequence numbers
+- verifying contribution records
+- contributor security basics
+- Android / Termux support
+- Python troubleshooting
+- examples of useful contributions
+
+---
+
+## What is a DID?
+
+A DID is a decentralized identifier used as a public identity.
+
+Example:
 
 ```text
 did:key:z6Mk...
 ```
 
-DID dapat digunakan untuk menghubungkan berbagai signed activity dengan identity yang sama.
+The same DID can be used across signed activity so that messages and contributions can be linked to one identity.
+
+A typical signed activity may contain:
+
+```text
+room
+sequence
+timestamp
+from
+text
+nonce
+```
 
 ---
 
-## 🔐 Security First
+## Security
 
 > [!WARNING]
-> Jangan pernah membagikan file atau credential privat kepada siapa pun.
+> Never share private identity material.
 
-### Aman untuk dibagikan
+Safe to share:
 
 ```text
 did:key:z6Mk...
 ```
 
-Public DID memang dibuat untuk menjadi public identifier.
-
-### Jangan pernah dibagikan
+Never share:
 
 ```text
 identity.pem
@@ -66,164 +100,142 @@ passphrase
 seed phrase
 ```
 
-`identity.pem` adalah bagian penting dari identity lokal.
+Your DID is public.
 
-Jangan pernah commit file tersebut ke GitHub.
-
----
-
-# 🚀 Quick Start — Android / Termux
-
-## 1. Install Termux Dependencies
-
-Buka Termux dan jalankan:
-
-```bash
-pkg update && pkg upgrade -y
-pkg install python git clang rust libffi openssl python-cryptography -y
-```
-
-Cek instalasi:
-
-```bash
-python --version
-git --version
-```
+Your private identity material is not.
 
 ---
 
-## 2. Clone Technocore DID Starter
+# Getting Started
+
+## 1. Requirements
+
+You need:
+
+- Python
+- Git
+- internet connection
+- Technocore DID starter
+
+Linux, macOS, Windows, VPS, and Android environments may differ slightly.
+
+---
+
+## 2. Clone the DID Starter
 
 ```bash
-cd ~
 git clone https://github.com/zunmax/technocore-did-starter.git
 cd technocore-did-starter
 ```
 
----
-
-## 3. Create Python Environment
-
-Untuk Termux dengan Python terbaru:
+Create a Python virtual environment:
 
 ```bash
-python -m venv --system-site-packages .venv
+python -m venv .venv
 source .venv/bin/activate
 ```
 
-Cek `cryptography`:
+Install dependencies:
 
 ```bash
-python -c "import cryptography; print(cryptography.__version__)"
+pip install -r requirements.txt
 ```
-
-Jika keluar nomor versi tanpa error, environment siap digunakan.
 
 ---
 
-# 🪪 Create Your Technocore DID
+# Create Your DID
 
-Jalankan:
+Run:
 
 ```bash
 python technocore_agent.py init
 ```
 
-Kamu akan diminta membuat passphrase.
+Create a strong passphrase.
 
-Gunakan passphrase minimal 12 karakter dan simpan dengan aman.
-
-Setelah berhasil, terminal akan menampilkan DID seperti:
+After initialization, you should receive a DID similar to:
 
 ```text
 did:key:z6Mk...
 ```
 
 > [!IMPORTANT]
-> Jangan jalankan `init` lagi jika kamu ingin mempertahankan identity yang sama.
+> Do not run `init` again if you want to keep using the same identity.
 
-Untuk melihat DID yang sudah ada:
+Check your existing DID:
 
 ```bash
 python technocore_agent.py did
 ```
 
-Masukkan passphrase identity ketika diminta.
-
 ---
 
-# 📡 Send Your First Signed Message
+# Send Your First Signed Message
 
-Contoh check-in ke Technocore lobby:
+Example:
 
 ```bash
-python technocore_agent.py say lobby "Hello Technocore, joining as a new contributor from Indonesia."
+python technocore_agent.py say lobby "Hello Technocore, joining as a new contributor."
 ```
 
-Response Technocore dapat berisi data seperti:
+A successful response should include a sequence number.
 
-```text
-room
-seq
-timestamp
-from
-nonce
-text
-```
-
-Contoh:
+Example:
 
 ```text
 room: lobby
 seq: 123456
 from: did:key:z6Mk...
+timestamp: ...
 ```
 
-`seq` adalah sequence number aktivitas tersebut.
+Keep the sequence number if you want to reference the activity later.
 
 ---
 
-# 🛠️ Create a Useful Contribution
+# What Counts as a Contribution?
 
-Contribution tidak harus berupa code.
+Useful contributions can include:
 
-Beberapa contoh contribution:
-
-| Type | Example |
+| Category | Examples |
 |---|---|
-| 📚 Tutorial | Guide setup Technocore |
-| 🌐 Translation | Documentation Bahasa Indonesia |
-| 🧵 Content | Educational X thread |
-| 🔬 Research | Analysis / protocol research |
-| 🧰 Tool | Verification / utility tool |
-| 🎥 Video | Setup tutorial |
-| 🖼️ Infographic | DID / Technocore explanation |
+| Documentation | setup guides, FAQs, explainers |
+| Localization | translations, regional documentation |
+| Education | X threads, videos, diagrams |
+| Research | protocol analysis, ecosystem research |
+| Tools | utilities, verifiers, dashboards |
+| Integrations | apps, APIs, agent integrations |
+| Developer Resources | examples, SDK helpers, templates |
 
-Prinsip utamanya:
+A good contribution should help someone:
 
-> Build something that actually helps another person understand, use, or discover Technocore.
+- understand Technocore
+- use Technocore
+- debug Technocore
+- discover Technocore
+- build with Technocore
 
 ---
 
-# 📝 Record a Contribution
+# Record a Contribution
 
-Setelah contribution dipublikasikan dan memiliki public URL, record menggunakan DID yang sama.
+Once your contribution is publicly available, record it using the same DID.
 
-Contoh:
+Example:
 
 ```bash
 python technocore_agent.py say technocore "I published a Technocore contribution: YOUR_PUBLIC_URL"
 ```
 
-Ganti:
+Replace:
 
 ```text
 YOUR_PUBLIC_URL
 ```
 
-dengan URL contribution sebenarnya.
+with the actual public URL.
 
-Setelah berhasil, cari:
+After posting, look for:
 
 ```json
 "posted": {
@@ -231,122 +243,169 @@ Setelah berhasil, cari:
 }
 ```
 
-Simpan sequence tersebut.
+Save the sequence number.
 
 ---
 
-# ✅ Verified Contribution
+# Verify the Contribution
 
-Repository ini sendiri merupakan Technocore community contribution untuk membantu pengguna Indonesia menjalankan DID dari Android.
+A contribution record can be checked using:
 
-### Contribution
+```text
+DID
+Room
+Sequence
+Contribution URL
+```
 
-https://github.com/bobbymarc00/technocore-indonesia
+A successful verification creates a stronger link between:
 
-### Technocore Record
+```text
+Public identity
++
+Signed activity
++
+Public contribution
++
+Timestamp
++
+Sequence
+```
+
+This is more useful than simply claiming that a contribution was made.
+
+---
+
+# Verified Contribution Example
+
+This repository itself was recorded as a Technocore community contribution.
 
 | Field | Value |
 |---|---|
 | Room | `technocore` |
 | Sequence | `996657` |
-| Status | ✅ **VERIFIED** |
-| Contribution | Android / Termux Indonesian Guide |
+| Status | ✅ VERIFIED |
+| Contribution | Community contributor guide |
 
-Contribution tersebut telah diverifikasi terhadap public Technocore record.
+Public contribution:
 
----
-
-# 📱 Why Android?
-
-Banyak guide crypto / agent infrastructure mengasumsikan pengguna memiliki:
-
-```text
-Linux VPS
-Desktop
-Mac
-Dedicated server
-```
-
-Padahal untuk aktivitas dasar DID dan signed messaging, pengguna Android juga bisa ikut berpartisipasi.
-
-Dengan Termux:
-
-```text
-Android
-   ↓
-Termux
-   ↓
-Python
-   ↓
-Technocore DID
-   ↓
-Signed Activity
-```
-
-Ini membuat onboarding lebih mudah bagi komunitas mobile-first.
+https://github.com/bobbymarc00/technocore-indonesia
 
 ---
 
-# ♻️ Returning Later
+# Contributor Strategy
 
-Setelah setup pertama selesai, kamu tidak perlu install ulang semuanya.
+A stronger contributor profile usually contains multiple types of useful output.
 
-Buka Termux:
+Example:
+
+```text
+Contribution #1
+Technical / Documentation
+
+Contribution #2
+Education / Distribution
+
+Contribution #3
+Tool / Integration
+```
+
+This creates a more complete contributor history than repeatedly posting similar check-ins.
+
+Quality is more useful than message volume.
+
+---
+
+# Example Contribution Paths
+
+## Documentation Contributor
+
+```text
+Write guide
+→ publish
+→ record
+→ verify
+```
+
+## Creator / Educator
+
+```text
+Create educational thread
+→ publish
+→ record
+→ verify
+```
+
+## Developer
+
+```text
+Build tool
+→ open-source
+→ record
+→ verify
+```
+
+## Researcher
+
+```text
+Publish research
+→ record
+→ verify
+```
+
+---
+
+# Android / Termux
+
+Basic DID and contribution workflows can also be performed from Android.
+
+This can be useful for contributors who do not have access to a desktop or VPS.
+
+Install dependencies:
 
 ```bash
-cd ~/technocore-did-starter
+pkg update && pkg upgrade -y
+pkg install python git clang rust libffi openssl python-cryptography -y
+```
+
+Clone the starter:
+
+```bash
+git clone https://github.com/zunmax/technocore-did-starter.git
+cd technocore-did-starter
+```
+
+Create an environment:
+
+```bash
+python -m venv --system-site-packages .venv
 source .venv/bin/activate
 ```
 
-Kemudian cek identity:
+Check cryptography:
 
 ```bash
-python technocore_agent.py did
-```
-
-Atau kirim activity baru:
-
-```bash
-python technocore_agent.py say lobby "Hello again Technocore."
+python -c "import cryptography; print(cryptography.__version__)"
 ```
 
 ---
 
-# 💾 Backup Your Identity
+# Android / Python 3.14 Troubleshooting
 
-File penting:
-
-```text
-identity.pem
-```
-
-Backup file tersebut ke tempat privat.
-
-Simpan passphrase secara terpisah.
-
-Jika pindah HP atau komputer, identity yang sama dapat dipertahankan selama kamu memiliki identity file dan passphrase yang benar.
-
-> [!CAUTION]
-> Jangan pernah upload `identity.pem` ke GitHub, Google Drive publik, Discord, Telegram, atau tempat publik lainnya.
-
----
-
-# 🧩 Termux Python 3.14 Troubleshooting
-
-Pada beberapa perangkat Android, `cryptography` yang diinstall langsung lewat pip dapat menghasilkan error seperti:
+Some Termux environments may encounter:
 
 ```text
 ImportError: dlopen failed: cannot locate symbol "PyModule_Type"
 ```
 
-Solusi yang berhasil digunakan:
+A working approach is:
 
 ```bash
 pip uninstall cryptography -y
 pkg install python-cryptography -y
 ```
 
-Kemudian buat ulang environment:
+Recreate the environment:
 
 ```bash
 deactivate
@@ -362,60 +421,84 @@ Test:
 python -c "import cryptography; print(cryptography.__version__)"
 ```
 
-Jika versi `cryptography` muncul, coba kembali:
+If a version is returned without an error, try the Technocore command again.
+
+---
+
+# Returning Later
+
+You do not need to recreate your DID every time.
+
+Activate the existing environment:
+
+```bash
+cd ~/technocore-did-starter
+source .venv/bin/activate
+```
+
+Check the DID:
 
 ```bash
 python technocore_agent.py did
 ```
 
+Continue using the same identity.
+
 ---
 
-# 🗺️ Contribution Flow
+# Backup
+
+Back up:
 
 ```text
-Create DID
-    ↓
-Send signed activity
-    ↓
-Build something useful
-    ↓
-Publish contribution
-    ↓
-Record public URL
-    ↓
-Receive sequence number
-    ↓
-Verify contribution
-    ↓
-Build contributor history
+identity.pem
 ```
 
----
+and securely store the passphrase separately.
 
-# 🤝 Contributing
+Do not upload private identity files to:
 
-Jika kamu menemukan:
-
-- masalah Termux
-- troubleshooting baru
-- improvement dokumentasi
-- typo
-- solusi Android
-- integration baru
-
-silakan fork repository atau buat contribution sendiri.
-
-Semakin banyak dokumentasi lokal, semakin mudah pengguna baru memahami teknologi ini.
+- GitHub
+- public cloud folders
+- Telegram
+- Discord
+- X
+- public repositories
 
 ---
 
-# ⚠️ Disclaimer
+# Indonesian Notes
+
+This guide also includes practical findings from testing Technocore on Android / Termux.
+
+Indonesian-language documentation and localization can be added as separate resources to help regional onboarding without limiting the main guide to one language or platform.
+
+---
+
+# Future Contributions
+
+Potential improvements for this repository:
+
+- Windows setup
+- macOS setup
+- Linux / VPS setup
+- contribution verification examples
+- DID backup migration guide
+- creator contribution templates
+- public activity explorer
+- proof helper tools
+- Indonesian translation
+- additional language translations
+
+---
+
+# Disclaimer
 
 This repository is a community-created educational resource.
 
-It is **not official documentation** from Flop Labs or Technocore.
+It is not official documentation from Flop Labs or Technocore.
 
-Creating a DID, sending activity, or making contributions does **not guarantee**:
+Creating a DID or making contributions does not guarantee:
 
 ```text
 $FLOP allocation
@@ -424,12 +507,8 @@ token rewards
 financial rewards
 ```
 
-Final eligibility, if any, is determined by the relevant project team.
+Final eligibility or rewards, if any, are determined by the relevant project team.
 
 ---
 
-## 🇮🇩 Built for the Indonesian Technocore Community
-
-From Android.
-
-No VPS required for basic DID contribution workflow.
+## Build useful things. Record them. Verify them.
