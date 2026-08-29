@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import tempfile
@@ -32,6 +34,7 @@ class MonitorTestCase(unittest.TestCase):
             "ignore_senders": [],
             "minimum_score": 1,
             "notify_stdout": False,
+            "max_notifications_per_run": 10,
             "telegram": {"enabled": False},
         }
         payload.update(updates)
@@ -77,6 +80,20 @@ class FilteringTests(MonitorTestCase):
         self.assertTrue(result.matched)
         self.assertEqual(result.score, 1)
         self.assertIn("keyword: task", result.reasons)
+
+    def test_keyword_does_not_match_inside_longer_word(self) -> None:
+        config = self.make_config(mentions=[])
+        result = monitor.match_message(
+            {"from": "agent", "text": "This is tasking, not a task request"},
+            config,
+        )
+        self.assertTrue(result.matched)
+        self.assertEqual(result.reasons.count("keyword: task"), 1)
+
+    def test_sender_name_does_not_trigger_keyword(self) -> None:
+        config = self.make_config(mentions=[])
+        result = monitor.match_message({"from": "taskbot", "text": "hello"}, config)
+        self.assertFalse(result.matched)
 
     def test_mention_scores_three(self) -> None:
         config = self.make_config(minimum_score=3)
@@ -262,6 +279,44 @@ class WorkflowTests(MonitorTestCase):
         self.assertEqual((alerts, scanned, errors), (0, 1, []))
         self.assertEqual(state["rooms"]["technocore"]["last_seq"], 50)
         self.assertFalse(config.outbox_dir.exists())
+
+    @mock.patch("technocore_monitor.fetch_room")
+    def test_idle_run_is_silent_on_stdout(self, mock_fetch: mock.Mock) -> None:
+        config = self.make_config()
+        mock_fetch.return_value = self.room_view([], since=0)
+
+        with contextlib.redirect_stdout(io.StringIO()) as stdout:
+            code = monitor.run_once(config)
+
+        self.assertEqual(code, 0)
+        self.assertEqual(stdout.getvalue(), "")
+
+    @mock.patch("technocore_monitor.notify")
+    @mock.patch("technocore_monitor.fetch_room")
+    def test_notification_budget_caps_delivery(
+        self, mock_fetch: mock.Mock, mock_notify: mock.Mock
+    ) -> None:
+        config = self.make_config(
+            max_notifications_per_run=1,
+            notify_stdout=True,
+        )
+        state = monitor.empty_state()
+        state["rooms"]["technocore"] = {"last_seq": 0, "generation": 1}
+        mock_fetch.return_value = self.room_view(
+            [
+                {"seq": 1, "ts": "2026-08-29T00:00:00Z", "from": "a", "text": "new task"},
+                {"seq": 2, "ts": "2026-08-29T00:00:01Z", "from": "b", "text": "another task"},
+            ],
+            since=0,
+        )
+
+        with contextlib.redirect_stderr(io.StringIO()) as stderr:
+            alerts, scanned, errors = monitor.process_room(config, state, "technocore")
+
+        self.assertEqual((alerts, scanned, errors), (2, 2, []))
+        self.assertEqual(mock_notify.call_count, 1)
+        self.assertEqual(stderr.getvalue(), "")
+        self.assertEqual(len(list(config.outbox_dir.glob("*.json"))), 2)
 
     @mock.patch("technocore_monitor.fetch_room")
     def test_new_matching_message_creates_review_item(self, mock_fetch: mock.Mock) -> None:

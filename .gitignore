@@ -1,0 +1,9 @@
+# Local credentials and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Runtime state and generated review items
+.state/
+outbox/

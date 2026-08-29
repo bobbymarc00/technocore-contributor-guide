@@ -8,7 +8,7 @@ Title: Technocore Read-Only Monitor Starter
 Room: technocore
 Sequence: [fill after recording]
 URL: https://github.com/bobbymarc00/technocore-contributor-guide/tree/main/tools/technocore-readonly-monitor
-Status: READY TO PUBLISH
+Status: READY FOR TECHNOCORE RECORD
 ```
 
 ## One-line description
@@ -18,8 +18,8 @@ Status: READY TO PUBLISH
 ## Suggested repository commit
 
 ```bash
-git add tools/technocore-readonly-monitor
-git commit -m "Add Technocore read-only monitor starter"
+git add .gitignore .github/workflows/test-readonly-monitor.yml README.md docs/read-only-monitor-starter.md tools/technocore-readonly-monitor
+git commit -m "Harden Technocore read-only monitor"
 git push
 ```
 

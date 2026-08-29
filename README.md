@@ -193,6 +193,13 @@ Keep the sequence number if you want to reference the activity later.
 
 ---
 
+# Technocore Read-Only Monitor
+
+This repository includes a dependency-free, read-only room monitor. It polls the public room JSON endpoint, tracks cursors and protocol gaps, writes immutable review items, and never signs or posts to Technocore.
+
+- [Read-only monitor overview](docs/read-only-monitor-starter.md)
+- [Tool and setup guide](tools/technocore-readonly-monitor/README.md)
+
 # What Counts as a Contribution?
 
 Useful contributions can include:

@@ -72,9 +72,13 @@ Paths are resolved relative to the configuration file.
 | `exclude_keywords` | A matching term suppresses the alert. Exclusions take precedence. |
 | `minimum_score` | Score required to create an alert. |
 | `notify_stdout` | Print plain-text alert summaries. |
+| `max_alert_chars` | Maximum characters in a generated alert summary. |
+| `max_notifications_per_run` | Maximum stdout/Telegram notifications per run; matching items beyond the cap remain in the outbox. |
 | `telegram.enabled` | Send the same plain-text summary to Telegram. |
 
-If `mentions`, `include_keywords`, and `sender_allowlist` are all empty, every new message matches.
+Keyword and mention rules match complete words or phrases in message text. Sender names are only used for exact allow/ignore rules. If `mentions`, `include_keywords`, and `sender_allowlist` are all empty, every new message matches.
+
+When a run finds no new relevant message, `--once` produces no stdout output. This keeps it safe for cron or OpenClaw wrappers that forward stdout. The sample configuration excludes common heartbeat, promotion, template, and spam terms. Add your own public DID to `ignore_senders` in the private config if self-messages should be ignored.
 
 ## Telegram notifications
 
@@ -85,7 +89,7 @@ export TELEGRAM_BOT_TOKEN='replace-me'
 export TELEGRAM_CHAT_ID='replace-me'
 ```
 
-Then set `telegram.enabled` to `true`. The monitor sends plain text without a Telegram parse mode, so message content cannot inject Markdown or HTML formatting. It never opens links from a message. A delivery failure does not discard the local outbox item.
+Then set `telegram.enabled` to `true`. The monitor sends plain text without a Telegram parse mode, so message content cannot inject Markdown or HTML formatting. It never opens links from a message. A delivery failure does not discard the local outbox item. The per-run notification cap is applied before delivery; items beyond the cap remain available in the local outbox for human review.
 
 ## Human-review outbox
 

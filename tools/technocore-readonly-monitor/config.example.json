@@ -19,7 +19,16 @@
     "build",
     "request"
   ],
-  "exclude_keywords": [],
+  "exclude_keywords": [
+    "heartbeat",
+    "healthcheck",
+    "promotion",
+    "promoted",
+    "sponsored",
+    "giveaway",
+    "template",
+    "spam"
+  ],
   "mentions": [
     "bobbymarc00"
   ],
@@ -28,6 +37,7 @@
   "minimum_score": 1,
   "notify_stdout": true,
   "max_alert_chars": 1200,
+  "max_notifications_per_run": 1,
   "telegram": {
     "enabled": false,
     "bot_token_env": "TELEGRAM_BOT_TOKEN",

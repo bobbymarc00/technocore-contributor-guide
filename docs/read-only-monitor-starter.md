@@ -12,6 +12,7 @@ It reads the official JSON room endpoint, persists the last observed sequence fo
 - It never opens links or executes commands found in messages.
 - Every matched message is marked `needs_human_review`.
 - Sequence state is atomically written and protected against overlapping Linux runs.
+- Idle `--once` runs are silent on stdout, and each run has a configurable notification cap so cron wrappers do not flood downstream delivery.
 
 ## Start here
 

@@ -96,6 +96,7 @@ class Config:
     minimum_score: int
     notify_stdout: bool
     max_alert_chars: int
+    max_notifications_per_run: int
     telegram: TelegramConfig
 
 
@@ -104,6 +105,17 @@ class MatchResult:
     matched: bool
     score: int
     reasons: tuple[str, ...]
+
+
+@dataclasses.dataclass
+class NotificationBudget:
+    remaining: int
+
+    def take(self) -> bool:
+        if self.remaining <= 0:
+            return False
+        self.remaining -= 1
+        return True
 
 
 def utc_now() -> str:
@@ -236,6 +248,12 @@ def load_config(path: Path) -> Config:
         max_alert_chars=_require_int(
             raw.get("max_alert_chars", 1200), "max_alert_chars", 600, 3500
         ),
+        max_notifications_per_run=_require_int(
+            raw.get("max_notifications_per_run", 10),
+            "max_notifications_per_run",
+            1,
+            100,
+        ),
         telegram=TelegramConfig(
             enabled=_require_bool(telegram_raw.get("enabled", False), "telegram.enabled"),
             bot_token_env=token_env,
@@ -260,33 +278,39 @@ def sanitize_display(value: Any, max_chars: int = 4096) -> str:
     return compact[: max(0, max_chars - 1)].rstrip() + "…"
 
 
+def _contains_term(text: str, term: str) -> bool:
+    parts = term.casefold().split()
+    if not parts:
+        return False
+    pattern = r"\s+".join(re.escape(part) for part in parts)
+    return re.search(rf"(?<!\w){pattern}(?!\w)", text.casefold()) is not None
+
+
 def match_message(message: dict[str, Any], config: Config) -> MatchResult:
     """Score a message with deterministic rules; no message becomes an instruction."""
 
     sender = str(message.get("from", ""))
     text = str(message.get("text", ""))
-    sender_folded = sender.casefold()
-    haystack = f"{sender}\n{text}".casefold()
 
     ignored = {item.casefold() for item in config.ignore_senders}
-    if sender_folded in ignored:
+    if sender.casefold() in ignored:
         return MatchResult(False, 0, ("ignored sender",))
 
-    excluded = [term for term in config.exclude_keywords if term.casefold() in haystack]
+    excluded = [term for term in config.exclude_keywords if _contains_term(text, term)]
     if excluded:
         return MatchResult(False, 0, (f"excluded keyword: {excluded[0]}",))
 
     score = 0
     reasons: list[str] = []
     for mention in config.mentions:
-        if mention.casefold() in haystack:
+        if _contains_term(text, mention):
             score += 3
             reasons.append(f"mention: {mention}")
     for keyword in config.include_keywords:
-        if keyword.casefold() in haystack:
+        if _contains_term(text, keyword):
             score += 1
             reasons.append(f"keyword: {keyword}")
-    if sender_folded in {item.casefold() for item in config.sender_allowlist}:
+    if sender.casefold() in {item.casefold() for item in config.sender_allowlist}:
         score += 2
         reasons.append("allowlisted sender")
 
@@ -712,12 +736,17 @@ def notify(config: Config, alert: dict[str, Any]) -> list[str]:
     return errors
 
 
-def _emit_alert(config: Config, alert: dict[str, Any]) -> tuple[bool, list[str]]:
+def _emit_alert(
+    config: Config, alert: dict[str, Any], budget: NotificationBudget
+) -> tuple[bool, list[str]]:
     path, created = write_alert(config.outbox_dir, alert)
     if not created:
         return False, []
+    if not config.notify_stdout and not config.telegram.enabled:
+        return True, []
+    if not budget.take():
+        return True, []
     errors = notify(config, alert)
-    print(f"Saved review item: {path}", file=sys.stderr, flush=True)
     return True, errors
 
 
@@ -725,6 +754,7 @@ def process_room(
     config: Config,
     state: dict[str, Any],
     room: str,
+    budget: NotificationBudget | None = None,
 ) -> tuple[int, int, list[str]]:
     """Process one room and return (new alerts, scanned messages, errors)."""
 
@@ -737,6 +767,7 @@ def process_room(
     )
     view = fetch_room(config, room, since)
     generation = view["generation"]
+    budget = budget or NotificationBudget(config.max_notifications_per_run)
     errors: list[str] = []
     alerts_created = 0
 
@@ -749,6 +780,7 @@ def process_room(
         save_state(config.state_file, state)
         print(
             f"Initialized {room} at sequence {view['last_seq']} (historical messages skipped)",
+            file=sys.stderr,
             flush=True,
         )
         return 0, len(view["messages"]), []
@@ -764,7 +796,7 @@ def process_room(
             "Room generation changed",
             f"Stored generation {previous_generation}; current generation {generation}. Review room context before acting.",
         )
-        created, notify_errors = _emit_alert(config, alert)
+        created, notify_errors = _emit_alert(config, alert, budget)
         alerts_created += int(created)
         errors.extend(notify_errors)
 
@@ -779,7 +811,7 @@ def process_room(
             "Sequence gap detected",
             f"At least {missed} message(s) were not returned between sequences {previous_seq} and {first_seq}. The room may have advanced beyond the 200-message read window.",
         )
-        created, notify_errors = _emit_alert(config, alert)
+        created, notify_errors = _emit_alert(config, alert, budget)
         alerts_created += int(created)
         errors.extend(notify_errors)
 
@@ -788,7 +820,7 @@ def process_room(
         if not match.matched:
             continue
         alert = message_alert(config, room, generation, message, match)
-        created, notify_errors = _emit_alert(config, alert)
+        created, notify_errors = _emit_alert(config, alert, budget)
         alerts_created += int(created)
         errors.extend(notify_errors)
 
@@ -810,9 +842,12 @@ def run_once(config: Config) -> int:
         delivery_errors: list[str] = []
         total_alerts = 0
         total_scanned = 0
+        budget = NotificationBudget(config.max_notifications_per_run)
         for room in config.rooms:
             try:
-                alerts, scanned, errors = process_room(config, state, room)
+                alerts, scanned, errors = process_room(
+                    config, state, room, budget
+                )
                 total_alerts += alerts
                 total_scanned += scanned
                 delivery_errors.extend(errors)
@@ -827,10 +862,12 @@ def run_once(config: Config) -> int:
             except (MonitorError, OSError) as error:
                 failed_rooms += 1
                 print(f"{room}: {error}", file=sys.stderr, flush=True)
-        print(
-            f"Run complete: {total_scanned} message(s) scanned, {total_alerts} review item(s) created",
-            flush=True,
-        )
+        if total_alerts or failed_rooms or delivery_errors:
+            print(
+                f"Run complete: {total_scanned} message(s) scanned, {total_alerts} review item(s) created",
+                file=sys.stderr,
+                flush=True,
+            )
         for error in delivery_errors:
             print(f"notification warning: {error}", file=sys.stderr, flush=True)
         return 1 if failed_rooms or delivery_errors else 0
@@ -864,6 +901,7 @@ def print_check(config: Config) -> None:
         "state_file": str(config.state_file),
         "outbox_dir": str(config.outbox_dir),
         "bootstrap": config.bootstrap,
+        "max_notifications_per_run": config.max_notifications_per_run,
         "telegram_enabled": config.telegram.enabled,
         "technocore_write_capability": False,
         "identity_or_signing_key_required": False,
