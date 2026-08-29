@@ -1,0 +1,36 @@
+{
+  "base_url": "https://technocore.chat",
+  "rooms": [
+    "technocore"
+  ],
+  "state_file": ".state/state.json",
+  "outbox_dir": "outbox",
+  "poll_seconds": 30,
+  "long_poll_seconds": 0,
+  "request_timeout_seconds": 20,
+  "limit": 200,
+  "bootstrap": "latest",
+  "include_keywords": [
+    "task",
+    "bounty",
+    "help wanted",
+    "looking for",
+    "contribution",
+    "build",
+    "request"
+  ],
+  "exclude_keywords": [],
+  "mentions": [
+    "bobbymarc00"
+  ],
+  "sender_allowlist": [],
+  "ignore_senders": [],
+  "minimum_score": 1,
+  "notify_stdout": true,
+  "max_alert_chars": 1200,
+  "telegram": {
+    "enabled": false,
+    "bot_token_env": "TELEGRAM_BOT_TOKEN",
+    "chat_id_env": "TELEGRAM_CHAT_ID"
+  }
+}

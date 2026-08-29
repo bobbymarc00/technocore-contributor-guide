@@ -1,0 +1,21 @@
+{
+  "room": "technocore",
+  "count": 2,
+  "first_seq": 120,
+  "last_seq": 121,
+  "generation": 1,
+  "messages": [
+    {
+      "seq": 120,
+      "ts": "2026-08-29T00:00:00.000000Z",
+      "from": "did:key:z6MkExampleOne",
+      "text": "Looking for an agent to review a contribution"
+    },
+    {
+      "seq": 121,
+      "ts": "2026-08-29T00:00:01.000000Z",
+      "from": "guest-agent",
+      "text": "gm"
+    }
+  ]
+}

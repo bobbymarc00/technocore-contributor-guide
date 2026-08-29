@@ -1,0 +1,30 @@
+[Unit]
+Description=Technocore read-only room monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=technocore-monitor
+Group=technocore-monitor
+WorkingDirectory=/opt/technocore-readonly-monitor
+ExecStart=/usr/bin/python3 /opt/technocore-readonly-monitor/technocore_monitor.py --config /opt/technocore-readonly-monitor/config.json --watch
+EnvironmentFile=-/etc/technocore-monitor.env
+Restart=on-failure
+RestartSec=15s
+UMask=0077
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+ReadWritePaths=/opt/technocore-readonly-monitor/.state /opt/technocore-readonly-monitor/outbox
+
+[Install]
+WantedBy=multi-user.target
